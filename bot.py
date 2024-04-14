@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 import bson
 
-TOKEN = 'токен'
+TOKEN = '6579753297:AAEcJNNZAC_tl1PyvxO9hyNCcWcY57JPBVg'
 API_URL = f'https://api.telegram.org/bot{TOKEN}/'
 
 def load_data_from_bson(file_path):
