@@ -8,11 +8,9 @@ def load_data_from_bson(file_path):
     return data
 
 def aggregate_data(dt_from, dt_upto, group_type, data):
-    # Преобразование строковых дат в формат datetime
     dt_from = datetime.fromisoformat(dt_from)
     dt_upto = datetime.fromisoformat(dt_upto)
     
-    # Фильтрация данных по временному интервалу и преобразование строковых дат в datetime
     filtered_data = [
         {'timestamp': pd.to_datetime(d['dt'], errors='coerce'), 'value': d['value']}
         for d in data
@@ -24,23 +22,24 @@ def aggregate_data(dt_from, dt_upto, group_type, data):
         if d['timestamp'] is not pd.NaT and dt_from <= d['timestamp'] <= dt_upto
     ]
     
-    # Создание DataFrame для удобства группировки
     df = pd.DataFrame(filtered_data)
     
-    # Группировка данных в зависимости от типа агрегации
     if group_type == 'hour':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='H')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='H')
     elif group_type == 'day':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='D')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='D')
     elif group_type == 'month':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='M')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='M')
     
-    # Создание полного списка меток времени в указанном интервале
+    # print('grouped_data-',grouped_data)
     full_range = pd.date_range(start=dt_from, end=dt_upto, freq=group_type[0].upper())
-    
-    # Заполнение отсутствующих значений нулями и формирование ответа
     aggregated = grouped_data.reindex(full_range, fill_value=0)['value'].tolist()
-    labels = [label.strftime('%Y-%m-%dT%H:%M:%S') for label in full_range]
+
+    # Преобразование каждого периода в начало месяца и преобразование в строку
+    labels = [period.start_time.strftime('%Y-%m-%dT%H:%M:%S') for period in period_range]
     
     return {"dataset": aggregated, "labels": labels}
 
