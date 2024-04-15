@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 import bson
 
-TOKEN = '6579753297:AAEcJNNZAC_tl1PyvxO9hyNCcWcY57JPBVg'
+TOKEN = 'TOKEN'
 API_URL = f'https://api.telegram.org/bot{TOKEN}/'
 
 def load_data_from_bson(file_path):
@@ -32,15 +32,20 @@ def aggregate_data(dt_from, dt_upto, group_type, data):
     
     if group_type == 'hour':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='H')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='H')
     elif group_type == 'day':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='D')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='D')
     elif group_type == 'month':
         grouped_data = df.groupby(pd.Grouper(key='timestamp', freq='M')).sum()
+        period_range = pd.period_range(start=dt_from, end=dt_upto, freq='M')
     
+    # print('grouped_data-',grouped_data)
     full_range = pd.date_range(start=dt_from, end=dt_upto, freq=group_type[0].upper())
-    
     aggregated = grouped_data.reindex(full_range, fill_value=0)['value'].tolist()
-    labels = [label.strftime('%Y-%m-%dT%H:%M:%S') for label in full_range]
+    
+    # Преобразование каждого периода в начало месяца и преобразование в строку
+    labels = [period.start_time.strftime('%Y-%m-%dT%H:%M:%S') for period in period_range]
     
     return {"dataset": aggregated, "labels": labels}
 
