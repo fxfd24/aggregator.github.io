@@ -4,3 +4,4 @@
   * aggregate.py - пример работы алгоритма агрегации (pandas, bson)
   * bot.py - код телеграм бота (asyncio, requests, json)
   * sample_collection.bson - коллекция со статистическими данными
+  * README.md - файл-описание
